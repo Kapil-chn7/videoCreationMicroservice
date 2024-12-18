@@ -1,27 +1,49 @@
 import axios from "axios";
-
+import fs from "fs";
 export const textToSpeech = async (text) => {
-  const GOOGLE_TTS_API_URL =
-    "https://texttospeech.googleapis.com/v1/text:synthesize";
-  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+  const apiKey = "AIzaSyB4TrB-ozNHlYK0Dx3HhxAfd5kgPW9La6E"; // Replace with your actual API key
 
-  try {
-    const requestBody = {
-      input: { text },
-      voice: { languageCode: "en-US", name: "en-US-Wavenet-D" },
-      audioConfig: { audioEncoding: "MP3" },
-    };
+  const data = {
+    input: {
+      text: text,
+    },
+    voice: {
+      languageCode: "en-US",
+      name: "en-US-Wavenet-D",
+    },
+    audioConfig: {
+      audioEncoding: "MP3",
+    },
+  };
 
-    const response = await axios.post(GOOGLE_TTS_API_URL, requestBody, {
-      headers: {
-        Authorization: `Bearer ${GOOGLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+  axios
+    .post(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    )
+    .then((response) => {
+      // The audio content will be in base64 format in response.data.audioContent
+      const audioContent = response.data.audioContent;
+
+      // Decode the base64 string to binary data
+      const audioBuffer = Buffer.from(audioContent, "base64");
+
+      // Save the binary data as an MP3 file
+      fs.writeFile("output.mp3", audioBuffer, (err) => {
+        if (err) {
+          console.error("Error saving audio file:", err);
+        } else {
+          console.log("Audio file saved as output.mp3");
+        }
+      });
+    })
+    .catch((error) => {
+      console.error("Error converting text to speech:", error);
     });
-
-    return response.data.audioContent;
-  } catch (error) {
-    console.error("Error converting text to speech:", error);
-    throw new Error("Failed to convert text to speech.");
-  }
 };
