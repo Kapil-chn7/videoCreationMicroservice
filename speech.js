@@ -1,7 +1,7 @@
 import axios from "axios";
 import fs from "fs";
 export const textToSpeech = async (text) => {
-  const apiKey = "AIzaSyB4TrB-ozNHlYK0Dx3HhxAfd5kgPW9La6E"; // Replace with your actual API key
+  const apiKey = process.env.GOOGLE_API_KEY; // Replace with your actual API key
 
   const data = {
     input: {
